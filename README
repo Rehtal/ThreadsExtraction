@@ -1,0 +1,16 @@
+Author: Rehal
+Time: 2012.11
+
+Description:
+
+This is a small project for auto-download and filter
+specific contents from 1)hkbisi.com and 2)SexInSex.
+
+In fact, this project only care about the subtile threads.
+It will simply ignore all other unnecessary information. In
+other words, it's a content extraction program using
+human-made-filter(I made it!!).
+
+The logic of this project is quite simple. No need to
+explain here. Just look at the original source files and
+that would be enough.
