@@ -14,9 +14,9 @@ import os
 
 def record_classify(keywords, site, record_empty_semaphore,\
 record_full_semaphore, record_share_buffer, end_event):
-	"""Filter hkbisi records by matching keywords.
+	"""Filter hkbici records by matching keywords.
 	input:
-	  site: hkbisi or sis.
+	  site: hkbici or sis.
 	  keywords: dict of keywords.
 	  record_empty_semaphore: empty space for record_share_buffer.
 	  record_full_semaphore: remain space for record_share_buffer.

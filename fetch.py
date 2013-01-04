@@ -2,7 +2,7 @@
 """fetch.py
 
 1, Fetch specific web pages from:
-	1, hkbisi
+	1, hkbici
 	2, SexInSex
 2, Extract records from raw web page.
 
@@ -11,11 +11,11 @@ Using consumer and producer model.
 """
 import threading
 import socket
-from HTMLProcessor import hkbisiHTMLProcessor as HHP
+from HTMLProcessor import hkbiciHTMLProcessor as HHP
 from HTMLProcessor import sisHTMLProcessor as SHP
 
-PAGES = 10
-HKBISI = 'hkbisi'
+PAGES = 50
+HKBICI = 'hkbici'
 SIS = 'sis'
 
 def fetchSIS(page_empty_semaphore, page_full_semaphore, page_share_buffer):
@@ -56,14 +56,14 @@ def fetchSIS(page_empty_semaphore, page_full_semaphore, page_share_buffer):
 				time.sleep(1)
 				break
 
-def fetchHKBISI(page_empty_semaphore, page_full_semaphore, page_share_buffer):
-	"""Fetch web pages from hkbisi.
+def fetchHKBICI(page_empty_semaphore, page_full_semaphore, page_share_buffer):
+	"""Fetch web pages from hkbici.
 	input:
 	  page_empty_semaphore: semaphore for empty space.
 	  page_full_semaphore: semaphore for full space.
 	  page_share_buffer: shared buffer between consumer and producer"""
 	# Generate all urls.
-	gen_url = lambda s: "http://hkbisi.com/forum-2-"\
+	gen_url = lambda s: "http://hkbici.com/forum-2-"\
 	+ s + ".html"
 
 	# Prepare urls.
@@ -78,7 +78,7 @@ def fetchHKBISI(page_empty_semaphore, page_full_semaphore, page_share_buffer):
 	cj = cookielib.CookieJar()
 	opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
 	encoded_data = urllib.urlencode(cookie_data)
-	opener.open("http://hkbisi.com/member.php?mod=logging&action=login&loginsubmit=yes&infloat=yes&lssubmit=yes",\
+	opener.open("http://hkbici.com/member.php?mod=logging&action=login&loginsubmit=yes&infloat=yes&lssubmit=yes",\
 	encoded_data)
 
 	# Not using list conprehension because we need to
@@ -93,7 +93,7 @@ def fetchHKBISI(page_empty_semaphore, page_full_semaphore, page_share_buffer):
 				# Traditional PV operation.
 				page_empty_semaphore.acquire()
 				page_share_buffer.append(opener.open(url,\
-					timeout=5).read())
+						timeout=5).read())
 				page_full_semaphore.release()
 			except socket.timeout:
 				continue
@@ -116,7 +116,7 @@ record_share_buffer, end_event):
 	   producer.
 	 end_event: no more record and set end signal."""
 	# Traditional PV operation.
-	if site==HKBISI:
+	if site==HKBICI:
 		p = HHP()
 	elif site==SIS:
 		p = SHP()
@@ -133,6 +133,15 @@ record_share_buffer, end_event):
 
 	end_event.set()
 
+	# Below codes can solve the bug that classify threads no
+	# ending cuz they will wait for the full semaphore.
+	end_record = {}
+	end_record['title'] = ''
+	end_record['href'] = '' 
+	record_empty_semaphore.acquire()
+	record_share_buffer.append(end_record)
+	record_full_semaphore.release()
+
 def fetchThreadings(thread_args):
 	"""Combine all these functions together using multi-thread.
 	input:
@@ -142,10 +151,10 @@ def fetchThreadings(thread_args):
 	sis['page_full_semaphore'] = threading.Semaphore(0)
 	sis['page_empty_semaphore'] = threading.Semaphore(PAGES)
 	sis['page_share_buffer'] = []
-	hkbisi = {}
-	hkbisi['page_full_semaphore'] = threading.Semaphore(0)
-	hkbisi['page_empty_semaphore'] = threading.Semaphore(PAGES)
-	hkbisi['page_share_buffer'] = []
+	hkbici = {}
+	hkbici['page_full_semaphore'] = threading.Semaphore(0)
+	hkbici['page_empty_semaphore'] = threading.Semaphore(PAGES)
+	hkbici['page_share_buffer'] = []
 
 	# Threading.
 	sis_producer = threading.Thread(target=fetchSIS, kwargs=sis)
@@ -157,21 +166,21 @@ def fetchThreadings(thread_args):
 	extend_sis['site'] = SIS
 	sis_consumer = threading.Thread(target=extract, kwargs=extend_sis)
 	sis_consumer.start()
-	sis_consumer.setName('SIS pages consumer')
+	sis_consumer.setName('Extract SIS pages')
 	
-	hkbisi_producer = threading.Thread(target=fetchHKBISI,\
-	kwargs=hkbisi)
-	hkbisi_producer.start()
-	hkbisi_producer.setName('Get HKBISI pages')
+	hkbici_producer = threading.Thread(target=fetchHKBICI,\
+	kwargs=hkbici)
+	hkbici_producer.start()
+	hkbici_producer.setName('Get HKBICI pages')
 	
-	extend_hkbisi = hkbisi.copy()
-	extend_hkbisi.update(thread_args[HKBISI])
-	extend_hkbisi['site'] = HKBISI
-	hkbisi_consumer = threading.Thread(target=extract, kwargs=extend_hkbisi)
-	hkbisi_consumer.start()
-	hkbisi_consumer.setName('HKBISI pages consumer')
+	extend_hkbici = hkbici.copy()
+	extend_hkbici.update(thread_args[HKBICI])
+	extend_hkbici['site'] = HKBICI
+	hkbici_consumer = threading.Thread(target=extract, kwargs=extend_hkbici)
+	hkbici_consumer.start()
+	hkbici_consumer.setName('Extract HKBICI pages')
 
-	return [sis_producer, sis_consumer, hkbisi_producer, hkbisi_consumer]
+	return [sis_producer, sis_consumer, hkbici_producer, hkbici_consumer]
 
 if __name__ == "__main__":
 	pass

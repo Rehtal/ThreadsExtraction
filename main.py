@@ -25,12 +25,12 @@ if __name__ == "__main__":
 	sis['end_event'] = threading.Event()
 	thread_args['sis'] = sis
 
-	hkbisi = {}
-	hkbisi['record_empty_semaphore'] = threading.Semaphore(SHARE_SIZE)
-	hkbisi['record_full_semaphore'] = threading.Semaphore(0)
-	hkbisi['record_share_buffer'] = []
-	hkbisi['end_event'] = threading.Event()
-	thread_args['hkbisi'] = hkbisi
+	hkbici = {}
+	hkbici['record_empty_semaphore'] = threading.Semaphore(SHARE_SIZE)
+	hkbici['record_full_semaphore'] = threading.Semaphore(0)
+	hkbici['record_share_buffer'] = []
+	hkbici['end_event'] = threading.Event()
+	thread_args['hkbici'] = hkbici
 
 	threads = []
 	t = fetch.fetchThreadings(thread_args)
@@ -39,5 +39,6 @@ if __name__ == "__main__":
 	threads.extend(t)
 	
 	for t in threads:
+		print 'Waiting:', t.getName()
 		t.join()
-		print '\''+t.getName()+'\''+' ends'
+		print 'Finish:', t.getName()

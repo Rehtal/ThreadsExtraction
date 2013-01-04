@@ -67,8 +67,8 @@ class sisHTMLProcessor(SGMLParser):
 	def get_records(self):
 		return self.all_records
 
-class hkbisiHTMLProcessor(SGMLParser):
-	"""Extract records from hkbisi.com."""
+class hkbiciHTMLProcessor(SGMLParser):
+	"""Extract records from hkbici.com."""
 	def reset(self):
 		# Flags
 		self.record_flag = False
@@ -95,7 +95,7 @@ class hkbisiHTMLProcessor(SGMLParser):
 	def start_a(self, attrs):
 		if ('class', 'xst') in attrs and self.record_flag:
 			self.detail_flag = True
-			self.cur_record['href'] = "http://hkbisi.com/" + \
+			self.cur_record['href'] = "http://hkbici.com/" + \
 					[value for key, value in attrs if \
 					key=='href'][0]
 
@@ -110,7 +110,7 @@ class hkbisiHTMLProcessor(SGMLParser):
 		return self.all_records
 
 if __name__ == '__main__':
-	p = hkbisiHTMLProcessor()
+	p = hkbiciHTMLProcessor()
 	content = open('p').read()
 	p.feed(content)
 	for record in p.get_records():
